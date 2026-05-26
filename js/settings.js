@@ -12,7 +12,7 @@ function _renderSettingsView(container) {
   const fitClientId = LS.get('lifeOS:fit:clientid') || '';
   const goals = getGoals();
 
-  const maskedKey = apiKey ? `sk-ant-...${apiKey.slice(-6)}` : '';
+  const maskedKey = apiKey ? `...${apiKey.slice(-6)}` : '';
 
   container.innerHTML = `
     <div class="module">
@@ -23,15 +23,15 @@ function _renderSettingsView(container) {
       <div class="settings-section">
         <div class="settings-section-title">AI Integration</div>
         <div class="form-group">
-          <label>Anthropic API Key</label>
+          <label>Hyperspace API Token</label>
           <div class="api-key-row">
-            <input type="password" id="settings-apikey" placeholder="sk-ant-..." value="${apiKey}" autocomplete="off">
+            <input type="password" id="settings-apikey" placeholder="Paste your Hyperspace token" value="${apiKey}" autocomplete="off">
             <button class="btn small" id="settings-toggle-key">Show</button>
           </div>
           ${maskedKey ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">Current: ${maskedKey}</div>` : ''}
           <div style="font-size:11px;color:var(--text3);margin-top:4px;">Used for: food nutrition estimation, journal reflections, learning summaries</div>
         </div>
-        <button class="btn primary small" id="settings-save-key-btn">Save API Key</button>
+        <button class="btn primary small" id="settings-save-key-btn">Save Token</button>
         <div id="settings-key-msg" style="font-size:12px;color:var(--text3);margin-top:6px;min-height:14px;"></div>
       </div>
 

@@ -634,12 +634,11 @@ async function callClaude(systemPrompt, userMessage, maxTokens = 300) {
   const apiKey = LS.get('lifeOS:apikey');
   if (!apiKey) throw new Error('NO_API_KEY');
 
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+  const resp = await fetch('http://localhost:6655/anthropic/v1/messages', {
     method: 'POST',
     headers: {
-      'x-api-key': apiKey,
+      'Authorization': `Bearer ${apiKey}`,
       'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-client-side-api-key-allowed': 'true',
       'content-type': 'application/json'
     },
     body: JSON.stringify({
