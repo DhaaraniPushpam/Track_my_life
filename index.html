@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ── Sidebar ───────────────────────────────────── -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-mark">⬡</span>
+      <span class="logo-text">Life OS</span>
+    </div>
+
+    <div class="sidebar-fit-status">
+      <span class="fit-dot"></span>
+      <span id="fit-status-label">Fit Not Connected</span>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-item active" data-module="dashboard">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Dashboard</span>
+      </div>
+      <div class="nav-item" data-module="food">
+        <span class="nav-icon">◉</span>
+        <span class="nav-label">Food</span>
+      </div>
+      <div class="nav-item" data-module="water">
+        <span class="nav-icon">◎</span>
+        <span class="nav-label">Water</span>
+      </div>
+      <div class="nav-item" data-module="sleep">
+        <span class="nav-icon">◐</span>
+        <span class="nav-label">Sleep</span>
+      </div>
+      <div class="nav-item" data-module="movement">
+        <span class="nav-icon">◷</span>
+        <span class="nav-label">Movement</span>
+      </div>
+      <div class="nav-item" data-module="workout">
+        <span class="nav-icon">◆</span>
+        <span class="nav-label">Workout</span>
+      </div>
+      <div class="nav-item" data-module="tasks">
+        <span class="nav-icon">◻</span>
+        <span class="nav-label">Tasks</span>
+      </div>
+      <div class="nav-item" data-module="meetings">
+        <span class="nav-icon">◱</span>
+        <span class="nav-label">Meetings</span>
+      </div>
+      <div class="nav-item" data-module="journal">
+        <span class="nav-icon">◳</span>
+        <span class="nav-label">Journal</span>
+      </div>
+      <div class="nav-item" data-module="learnings">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Learnings</span>
+        <span class="nav-badge" style="display:none;">0</span>
+      </div>
+      <div class="nav-item" data-module="expenses">
+        <span class="nav-icon">◉</span>
+        <span class="nav-label">Expenses</span>
+        <span class="nav-badge" style="display:none;">0</span>
+      </div>
+      <div class="nav-item" data-module="fit">
+        <span class="nav-icon">◎</span>
+        <span class="nav-label">Google Fit</span>
+      </div>
+      <div class="nav-item" data-module="settings">
+        <span class="nav-icon">◐</span>
+        <span class="nav-label">Settings</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main content ──────────────────────────────── -->
+  <main id="main-content">
+    <!-- Modules render here -->
+  </main>
+
+</div>
+
+<!-- ── Scripts: load order matters ──────────────── -->
+<script src="js/core.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/fit.js"></script>
+<script src="js/food.js"></script>
+<script src="js/water.js"></script>
+<script src="js/sleep.js"></script>
+<script src="js/movement.js"></script>
+<script src="js/tasks.js"></script>
+<script src="js/meetings.js"></script>
+<script src="js/journal.js"></script>
+<script src="js/workout.js"></script>
+<script src="js/learnings.js"></script>
+<script src="js/expenses.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/dashboard.js"></script>
+
+<script>
+// ── Router ────────────────────────────────────────
+const mainContent = document.getElementById('main-content');
+const navItems = document.querySelectorAll('[data-module]');
+
+let currentModule = null;
+
+function navigateTo(moduleName) {
+  // Update active state
+  navItems.forEach(item => {
+    item.classList.toggle('active', item.dataset.module === moduleName);
+  });
+
+  currentModule = moduleName;
+  mainContent.innerHTML = '';
+
+  const renderers = {
+    dashboard:  () => renderDashboard(mainContent),
+    food:       () => renderFood(mainContent),
+    water:      () => renderWater(mainContent),
+    sleep:      () => renderSleep(mainContent),
+    movement:   () => renderMovement(mainContent),
+    workout:    () => renderWorkout(mainContent),
+    tasks:      () => renderTasks(mainContent),
+    meetings:   () => renderMeetings(mainContent),
+    journal:    () => renderJournal(mainContent),
+    learnings:  () => renderLearnings(mainContent),
+    expenses:   () => renderExpenses(mainContent),
+    fit:        () => renderFit(mainContent),
+    settings:   () => renderSettings(mainContent)
+  };
+
+  const fn = renderers[moduleName];
+  if (fn) {
+    try {
+      fn();
+    } catch (e) {
+      mainContent.innerHTML = `<div class="module"><div class="error-state">Error rendering ${moduleName}: ${e.message}</div></div>`;
+      console.error(e);
+    }
+  }
+
+  // Scroll top
+  mainContent.scrollTop = 0;
+}
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => navigateTo(item.dataset.module));
+});
+
+// ── Init ──────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Handle Google Fit OAuth callback first
+  const fitCallbackHandled = handleFitCallback();
+
+  // Initialize app (seed data, etc.)
+  initApp();
+
+  // Seed recurring tasks
+  seedRecurringTasks();
+
+  // Init notifications
+  initNotifications();
+
+  // Update sidebar badges and fit status
+  updateSidebarBadges();
+  updateSidebarFitStatus();
+
+  // Navigate to dashboard (or back to previous module if returning from OAuth)
+  const savedModule = sessionStorage.getItem('lifeOS:lastModule') || 'dashboard';
+  if (fitCallbackHandled) {
+    navigateTo('fit');
+    sessionStorage.removeItem('lifeOS:lastModule');
+  } else {
+    navigateTo(savedModule);
+  }
+
+  // Save current module to session storage when navigating
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      sessionStorage.setItem('lifeOS:lastModule', item.dataset.module);
+    });
+  });
+});
+
+// Save module before leaving page (for Fit OAuth redirect)
+window.addEventListener('beforeunload', () => {
+  if (currentModule) {
+    sessionStorage.setItem('lifeOS:lastModule', currentModule);
+  }
+});
+</script>
+
+</body>
+</html>
