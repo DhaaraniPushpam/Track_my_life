@@ -1,4 +1,4 @@
-# Life OS
+# Track My Life
 
 A personal life management dashboard that runs entirely in your browser — no backend, no accounts, no tracking.
 
